@@ -1,0 +1,11 @@
+server:
+    port: 8080
+
+spring:
+    application:
+        name: upload-service
+    neo4j:
+        uri: ${SPRING_NEO4J_URI:bolt://localhost:7687}
+        authentication:
+            password: ${SPRING_NEO4J_PASSWORD:password}
+            username: ${SPRING_NEO4J_USERNAME:neo4j}

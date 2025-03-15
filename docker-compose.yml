@@ -1,0 +1,30 @@
+services:
+  neo4j:
+    image: neo4j:2025.02.0
+    volumes:
+      - neo4j_logs:/logs
+      - neo4j_config:/config
+      - neo4j_data:/data
+      - neo4j_plugins:/plugins
+    environment:
+      - NEO4J_AUTH=neo4j/password
+      - NEO4J_PLUGINS=["apoc", "graph-data-science"]
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    restart: always
+  upload-service:
+    build:
+      context: ./upload-service
+      dockerfile: Dockerfile
+    container_name: upload-service
+    ports:
+      - "8080:8080"
+    depends_on:
+      - neo4j
+
+volumes:
+  neo4j_logs:
+  neo4j_config:
+  neo4j_data:
+  neo4j_plugins:
