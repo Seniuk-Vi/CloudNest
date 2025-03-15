@@ -1,16 +1,18 @@
 package org.brain.uploadservice.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
+import org.brain.uploadservice.configuration.KafkaProducerConfiguration;
+import org.brain.uploadservice.model.UploadToken;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 @Service
+@AllArgsConstructor
 public class KafkaPublisher {
 
-//    @Autowired
-//    private KafkaTemplate<String, CompressionMessage> kafkaTemplate;
+    private final KafkaTemplate<String, UploadToken> kafkaTemplate;
 
-    public void publishCompressionMessage(String token) {
-//        CompressionMessage message = new CompressionMessage(token, "START_COMPRESSION");
-//        kafkaTemplate.send("FileCompressionTopic", message);
+    public void publishCompressionMessage(UploadToken token) {
+        kafkaTemplate.send(KafkaProducerConfiguration.FILE_COMPRESSION_TOPIC, token);
     }
 }

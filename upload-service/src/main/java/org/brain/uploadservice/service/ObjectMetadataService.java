@@ -41,10 +41,11 @@ public class ObjectMetadataService {
         return objectMapper.toObjectResponse(fileObject);
     }
 
-    public void updateStatus(Long objectId, ObjectStatus status) {
+    public void updateStatus(Long objectId, ObjectStatus status, String error) {
         FileObject fileObject = objectRepository.findById(objectId)
                 .orElseThrow(() -> new RuntimeException("Object not found"));
         fileObject.setStatus(status);
+        fileObject.setError(error);
         objectRepository.save(fileObject);
     }
 

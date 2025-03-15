@@ -9,3 +9,20 @@ spring:
         authentication:
             password: ${SPRING_NEO4J_PASSWORD:password}
             username: ${SPRING_NEO4J_USERNAME:neo4j}
+    data:
+        redis:
+            host: ${SPRING_REDIS_HOST:localhost}
+            port: ${SPRING_REDIS_PORT:6379}
+    kafka:
+        bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+        topic:
+            file-compression: ${SPRING_KAFKA_TOPIC_FILE_COMPRESSION:file-compression}
+
+
+
+
+    cloud:
+        aws:
+            s3:
+                bucket:
+                    staging: ${SPRING_AWS_S3_BUCKET_STAGING:staging-bucket-nest}
