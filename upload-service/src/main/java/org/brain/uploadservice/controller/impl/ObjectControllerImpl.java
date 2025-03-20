@@ -6,9 +6,13 @@ import org.brain.uploadservice.payload.ObjectResponse;
 import org.brain.uploadservice.service.ObjectMetadataService;
 import org.brain.uploadservice.service.UploadService;
 import org.springframework.core.io.Resource;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.UUID;
+
 @AllArgsConstructor
+@RestController
 public class ObjectControllerImpl implements ObjectController {
 
     private final UploadService uploadService;
@@ -16,17 +20,17 @@ public class ObjectControllerImpl implements ObjectController {
     private final ObjectMetadataService objectMetadataService;
 
     @Override
-    public Resource getObjectById(Long objectId) {
+    public Resource getObjectById(UUID objectId) {
         return null;
     }
 
     @Override
-    public ObjectResponse getObjectMetadataById(Long objectId) {
+    public ObjectResponse getObjectMetadataById(UUID objectId) {
         return objectMetadataService.getObjectById(objectId);
     }
 
     @Override
-    public ObjectResponse createObject(Long parentFolderId, MultipartFile file) {
+    public ObjectResponse createObject(UUID parentFolderId, MultipartFile file) {
         return uploadService.handleFileUpload(file, parentFolderId);
     }
 

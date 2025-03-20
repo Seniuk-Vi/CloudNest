@@ -26,3 +26,5 @@ spring:
             s3:
                 bucket:
                     staging: ${SPRING_AWS_S3_BUCKET_STAGING:staging-bucket-nest}
+
+                region: ${SPRING_AWS_REGION:eu-central-1}

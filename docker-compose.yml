@@ -13,18 +13,76 @@ services:
       - "7474:7474"
       - "7687:7687"
     restart: always
-  upload-service:
-    build:
-      context: ./upload-service
-      dockerfile: Dockerfile
-    container_name: upload-service
+
+  kafka:
+    image: apache/kafka-native
     ports:
-      - "8080:8080"
+      - "9092:9092"
+    environment:
+      # Configure listeners for both docker and host communication
+      KAFKA_LISTENERS: CONTROLLER://localhost:9091,HOST://0.0.0.0:9092,DOCKER://0.0.0.0:9093
+      KAFKA_ADVERTISED_LISTENERS: HOST://localhost:9092,DOCKER://kafka:9093
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,DOCKER:PLAINTEXT,HOST:PLAINTEXT
+
+      # Settings required for KRaft mode
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@localhost:9091
+
+      # Listener to use for broker-to-broker communication
+      KAFKA_INTER_BROKER_LISTENER_NAME: DOCKER
+
+      # Required for a single node cluster
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+
+  kafka-ui:
+    image: kafbat/kafka-ui:main
+    ports:
+      - 3030:8080
+    environment:
+      DYNAMIC_CONFIG_ENABLED: "true"
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9093
     depends_on:
-      - neo4j
+      - kafka
+
+  redis:
+    image: redis:latest
+    container_name: redis_container
+    environment:
+      - REDIS_PASSWORD=password
+      - REDIS_USER=redis
+      - REDIS_USER_PASSWORD=password
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: [ "CMD", "redis-cli", "-a", "$REDIS_PASSWORD", "ping" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    restart: unless-stopped
+    tty: true
+    stdin_open: true
+
+#  upload-service:
+#    build:
+#      context: ./upload-service
+#      dockerfile: Dockerfile
+#    container_name: upload-service
+#    ports:
+#      - "8080:8080"
+#    depends_on:
+#      - neo4j
+#      - redis
+#      - kafka
+
 
 volumes:
   neo4j_logs:
   neo4j_config:
   neo4j_data:
   neo4j_plugins:
+  redis_data:

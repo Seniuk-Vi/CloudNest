@@ -1,25 +1,28 @@
 package org.brain.uploadservice.model;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.With;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.neo4j.core.schema.GeneratedValue;
 import org.springframework.data.neo4j.core.schema.Node;
+import org.springframework.data.neo4j.core.schema.RelationshipId;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Node("Object")
 @Getter
 @Setter
+@NoArgsConstructor
 public class FileObject {
     @Id
-    @With
     @GeneratedValue
-    private Long objectId;
+    private UUID objectId;
 
-    private Long userId;
+    private UUID userId;
 
     private String name;
 
@@ -33,11 +36,11 @@ public class FileObject {
     private String error;
 
 
-    public FileObject(Long userId, String name, Long size) {
+    public FileObject(UUID userId, String name, Long size) {
         this(null, userId, name, size, null, null, null);
     }
 
-    private FileObject(Long objectId, Long userId, String name, Long size, LocalDateTime createdAt, ObjectStatus status, String error) {
+    private FileObject(UUID objectId, UUID userId, String name, Long size, LocalDateTime createdAt, ObjectStatus status, String error) {
         this.objectId = objectId;
         this.userId = userId;
         this.name = name;

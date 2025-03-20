@@ -13,6 +13,7 @@
 
     <modules>
         <module>upload-service</module>
+        <module>compression-worker</module>
     </modules>
 
     <parent>

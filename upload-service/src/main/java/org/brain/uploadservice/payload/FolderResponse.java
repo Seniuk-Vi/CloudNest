@@ -7,18 +7,19 @@ import org.brain.uploadservice.model.FileObject;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @Data
 @AllArgsConstructor
 public class FolderResponse {
 
-    private Long folderId;
+    private UUID folderId;
 
     private String name;
 
     private LocalDateTime createdAt;
 
-    private List<ObjectResponse> childFolders;
+    private List<FolderResponse> childFolders;
 
-    private List<FileObject> fileObjects;
+    private List<ObjectResponse> fileObjects;
 }

@@ -6,6 +6,8 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.redis.core.RedisHash;
 import org.springframework.data.redis.core.TimeToLive;
 
+import java.util.UUID;
+
 @RedisHash("UploadToken")
 @Data
 @AllArgsConstructor
@@ -13,7 +15,7 @@ public class UploadToken {
     @Id
     private String uploadToken;
 
-    Long objectId;
+    UUID objectId;
 
     TokenStatus status;
 
@@ -24,7 +26,7 @@ public class UploadToken {
     @TimeToLive
     Long ttl;
 
-    public UploadToken(String uploadToken, Long objectId) {
+    public UploadToken(String uploadToken, UUID objectId) {
         this.uploadToken = uploadToken;
         this.objectId = objectId;
         this.status = null;

@@ -3,10 +3,12 @@ package org.brain.uploadservice.payload;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
+import java.util.UUID;
+
 @Data
 @AllArgsConstructor
 public class NestResponse {
 
-    private Long userId;
+    private UUID userId;
     private FolderResponse folderResponse;
 }

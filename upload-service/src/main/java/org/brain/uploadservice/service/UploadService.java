@@ -3,17 +3,16 @@ package org.brain.uploadservice.service;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.brain.uploadservice.exception.S3UploadFailed;
 import org.brain.uploadservice.model.ObjectStatus;
 import org.brain.uploadservice.model.TokenStatus;
 import org.brain.uploadservice.model.UploadToken;
 import org.brain.uploadservice.payload.ObjectResponse;
-import org.brain.uploadservice.repository.RedisRepository;
+import org.brain.uploadservice.repository.redis.RedisRepository;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.function.Supplier;
+import java.util.UUID;
 
 @Service
 @Slf4j
@@ -35,7 +34,7 @@ public class UploadService {
     private final int BACKOFF_INTERVAL = 1000;
 
     @Transactional
-    public ObjectResponse handleFileUpload(MultipartFile file, Long parentFolderId) {
+    public ObjectResponse handleFileUpload(MultipartFile file, UUID parentFolderId) {
         log.info("Handling file upload for file: {}", file.getOriginalFilename());
         ObjectResponse objectResponse = objectMetadataService.createObject(file.getOriginalFilename(), parentFolderId, file.getSize());
 

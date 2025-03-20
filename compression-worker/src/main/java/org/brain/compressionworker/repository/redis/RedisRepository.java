@@ -1,4 +1,4 @@
-package org.brain.uploadservice.repository;
+package org.brain.compressionworker.repository.redis;
 
 import org.brain.uploadservice.model.UploadToken;
 import org.springframework.data.repository.CrudRepository;

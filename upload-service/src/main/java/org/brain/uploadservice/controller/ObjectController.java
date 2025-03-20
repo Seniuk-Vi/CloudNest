@@ -8,22 +8,24 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.UUID;
+
 @RestController
 @RequestMapping("/api/v1/objects")
 public interface ObjectController {
 
     @GetMapping("/{objectId}/metadata")
     @Operation(summary = "Retrieves the object metadata by id")
-    ObjectResponse getObjectMetadataById(@PathVariable("objectId") Long objectId);
+    ObjectResponse getObjectMetadataById(@PathVariable("objectId") UUID objectId);
 
     @GetMapping("/{objectId}")
     @Operation(summary = "Retrieves the object by id")
-    Resource getObjectById(@PathVariable("objectId") Long objectId);
+    Resource getObjectById(@PathVariable("objectId") UUID objectId);
 
 
     @PostMapping(consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     @Operation(summary = "Creates an object")
-    ObjectResponse createObject(@RequestParam("folderId") Long folderId,
+    ObjectResponse createObject(@RequestParam("folderId") UUID folderId,
                                 @RequestParam("file") MultipartFile file);
 
 }

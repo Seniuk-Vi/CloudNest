@@ -7,7 +7,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
 
-@Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
+@Mapper(componentModel = MappingConstants.ComponentModel.SPRING, uses = {ObjectMapper.class})
 public interface FolderMapper {
 
 
@@ -20,6 +20,4 @@ public interface FolderMapper {
     @Mapping(source = "folder", target = "folderResponse")
     NestResponse folderToNestResponse(Folder folder);
 
-    // Folder to FolderResponse
-    Folder toFolder(FolderResponse folderResponse);
 }
