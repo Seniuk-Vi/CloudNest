@@ -28,7 +28,6 @@ public class ObjectMetadataService {
                 .orElseThrow(() -> new RuntimeException("Object not found")));
     }
 
-    @Transactional
     public ObjectResponse createObject(String name, UUID parentFolderId, Long size) {
         Folder parentFolder = folderRepository.findById(parentFolderId)
                 .orElseThrow(() -> new RuntimeException("Parent folder not found"));
@@ -49,6 +48,12 @@ public class ObjectMetadataService {
         fileObject.setStatus(status);
         fileObject.setError(error);
         objectRepository.save(fileObject);
+    }
+
+
+    public String getObjectPath(UUID objectId) {
+        return objectRepository.findFullFilePathByObjectId(objectId)
+                .orElseThrow(() -> new RuntimeException("Object not found"));
     }
 
 }

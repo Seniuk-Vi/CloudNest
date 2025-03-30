@@ -1,6 +1,6 @@
 package org.brain.compressionworker.repository.neo4j;
 
-import org.brain.uploadservice.model.FileObject;
+import org.brain.compressionworker.model.FileObject;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
 import org.springframework.stereotype.Repository;
 

@@ -35,7 +35,6 @@ public class FileObject {
 
     private String error;
 
-
     public FileObject(UUID userId, String name, Long size) {
         this(null, userId, name, size, null, null, null);
     }

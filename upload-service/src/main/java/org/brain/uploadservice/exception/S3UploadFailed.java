@@ -2,9 +2,9 @@ package org.brain.uploadservice.exception;
 
 public class S3UploadFailed extends Exception {
 
-    private final static String message = "S3 upload failed";
+    private static final String MESSAGE = "S3 upload failed to Staging bucket";
 
     public S3UploadFailed(Exception e) {
-        super(message, e);
+        super(MESSAGE, e);
     }
 }

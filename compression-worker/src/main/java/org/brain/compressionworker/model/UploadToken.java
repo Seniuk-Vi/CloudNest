@@ -2,7 +2,7 @@ package org.brain.compressionworker.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import org.brain.uploadservice.model.TokenStatus;
+import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.redis.core.RedisHash;
 import org.springframework.data.redis.core.TimeToLive;
@@ -12,6 +12,7 @@ import java.util.UUID;
 @RedisHash("UploadToken")
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 public class UploadToken {
     @Id
     private String uploadToken;
@@ -19,6 +20,8 @@ public class UploadToken {
     UUID objectId;
 
     TokenStatus status;
+
+    String filePath;
 
     int percentage;
 
@@ -31,6 +34,7 @@ public class UploadToken {
         this.uploadToken = uploadToken;
         this.objectId = objectId;
         this.status = null;
+        this.filePath = null;
         this.percentage = 0;
         this.error = null;
     }

@@ -1,7 +1,11 @@
 server:
-    port: 8080
+    port: 8081
 
 spring:
+    servlet:
+        multipart:
+            max-file-size: 1GB
+            max-request-size: 1GB
     application:
         name: upload-service
     neo4j:

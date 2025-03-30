@@ -18,6 +18,10 @@ public class ObjectResponse {
 
     private String status;
 
+    private String filePath;
+
+    private UUID userId;
+
     private String error;
 
     private String uploadToken;

@@ -19,6 +19,8 @@ public class UploadToken {
 
     TokenStatus status;
 
+    String filePath;
+
     int percentage;
 
     String error;
@@ -30,6 +32,7 @@ public class UploadToken {
         this.uploadToken = uploadToken;
         this.objectId = objectId;
         this.status = null;
+        this.filePath = null;
         this.percentage = 0;
         this.error = null;
     }

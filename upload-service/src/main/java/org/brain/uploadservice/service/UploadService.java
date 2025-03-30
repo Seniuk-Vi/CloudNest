@@ -1,5 +1,6 @@
 package org.brain.uploadservice.service;
 
+import jakarta.annotation.Resource;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,55 +24,28 @@ public class UploadService {
 
     private final RedisRepository redisRepository;
 
-    private final S3Service s3Service;
-
-    private final KafkaPublisher kafkaPublisher;
-
-    private final String S3_UPLOAD_FAILED = "S3 upload failed";
-
-    private final int MAX_RETRIES = 3;
-
-    private final int BACKOFF_INTERVAL = 1000;
+    private final AsyncStageFileService asyncStageFileService;
 
     @Transactional
     public ObjectResponse handleFileUpload(MultipartFile file, UUID parentFolderId) {
         log.info("Handling file upload for file: {}", file.getOriginalFilename());
+        // create object record
         ObjectResponse objectResponse = objectMetadataService.createObject(file.getOriginalFilename(), parentFolderId, file.getSize());
-
+        String filePath = objectMetadataService.getObjectPath(objectResponse.getObjectId());
+        // generate upload token
         UploadToken uploadToken = UploadTokenGenerator.generateUploadToken(objectResponse.getObjectId());
         objectResponse.setUploadToken(uploadToken.getUploadToken());
 
+        // save upload token to Redis
         uploadToken.setStatus(TokenStatus.STAGING);
+        uploadToken.setFilePath(filePath);
         redisRepository.save(uploadToken);
         log.info("Created object record for file: {} with upload token: {}", file.getOriginalFilename(), uploadToken);
 
-        stageFile(file, uploadToken);
+        // stage file asynchronously
+        asyncStageFileService.stageFile(file, uploadToken, objectResponse.getUserId().toString());
 
         return objectResponse;
     }
 
-    @Async
-    @Transactional
-    public void stageFile(MultipartFile file, UploadToken uploadToken) {
-        try {
-            log.info("Staging file: {} with upload token: {}", file.getOriginalFilename(), uploadToken);
-
-            s3Service.uploadToStagingBucket(file, uploadToken.getUploadToken());
-            log.debug("Staged file: {} with upload token: {}", file.getOriginalFilename(), uploadToken);
-
-            // todo: persistance exception due to missing context of uploadToken
-            uploadToken.setStatus(TokenStatus.WAITING_FOR_COMPRESSING);
-            redisRepository.save(uploadToken);
-            log.debug("Updated status for upload token: {} to WAITING_FOR_COMPRESSING", uploadToken);
-
-            kafkaPublisher.publishCompressionMessage(uploadToken);
-            log.info("Published compression message for upload token: {}", uploadToken);
-        } catch (Exception e) {
-            log.error("Failed to stage file: {} with upload token: {}. Exception: {}", file.getOriginalFilename(), uploadToken, e.getMessage());
-            uploadToken.setStatus(TokenStatus.FAILED);
-            uploadToken.setError(S3_UPLOAD_FAILED);
-            redisRepository.save(uploadToken);
-            objectMetadataService.updateStatus(uploadToken.getObjectId(), ObjectStatus.FAILED, S3_UPLOAD_FAILED);
-        }
-    }
 }
