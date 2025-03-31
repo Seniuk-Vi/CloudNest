@@ -71,7 +71,6 @@ public class KafkaCompressionListener {
         int retries = 0;
         while (retries < MAX_RETRIES) {
             try {
-                s3Service.uploadToMainBucket(compressedData, filePath);
                 return;
             } catch (Exception e) {
                 log.error("Failed to upload compressed data to main bucket for file: {}", filePath, e);

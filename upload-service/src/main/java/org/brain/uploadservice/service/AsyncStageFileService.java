@@ -26,20 +26,18 @@ public class AsyncStageFileService {
 
     private final String S3_UPLOAD_FAILED = "S3 upload failed";
 
-    private final int MAX_RETRIES = 3;
-
-    private final int BACKOFF_INTERVAL = 1000;
-
     @Async
     @Transactional
     public void stageFile(MultipartFile file, UploadToken uploadToken, String groupId) {
         try {
             log.info("Staging file: {} with upload token: {}", file.getOriginalFilename(), uploadToken);
 
-            s3Service.uploadToStagingBucket(file, uploadToken.getFilePath());
+            long startTime = System.currentTimeMillis();
+            s3Service.uploadToStagingBucket(file.getBytes(), uploadToken.getFilePath());
+            // log time in seconds
+            log.info("Time taken to upload file: {} to S3: {} seconds", file.getOriginalFilename(), (System.currentTimeMillis() - startTime) / 1000);
             log.debug("Staged file: {} with upload token: {}", file.getOriginalFilename(), uploadToken);
 
-            // todo: persistance exception due to missing context of uploadToken
             uploadToken.setStatus(TokenStatus.WAITING_FOR_COMPRESSING);
             redisRepository.save(uploadToken);
             log.debug("Updated status for upload token: {} to WAITING_FOR_COMPRESSING", uploadToken);
