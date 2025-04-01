@@ -1,5 +1,9 @@
 package org.brain.uploadservice.service;
 
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.Tracer;
+import io.opentelemetry.context.Context;
+import io.opentelemetry.context.Scope;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,10 +30,14 @@ public class AsyncStageFileService {
 
     private final String S3_UPLOAD_FAILED = "S3 upload failed";
 
-    @Async
+    private final Tracer tracer;
+
+    @Async("asyncExecutor")
     @Transactional
     public void stageFile(MultipartFile file, UploadToken uploadToken, String groupId) {
-        try {
+        Span span = tracer.spanBuilder("upload-service.stageFile").startSpan();
+
+        try (Scope scope = span.makeCurrent()) {
             log.info("Staging file: {} with upload token: {}", file.getOriginalFilename(), uploadToken);
 
             long startTime = System.currentTimeMillis();
@@ -45,11 +53,14 @@ public class AsyncStageFileService {
             kafkaPublisher.publishCompressionMessage(uploadToken, groupId);
             log.info("Published compression message for upload token: {}", uploadToken);
         } catch (Exception e) {
+            span.recordException(e);
             log.error("Failed to stage file: {} with upload token: {}. Exception: {}", file.getOriginalFilename(), uploadToken, e.getMessage());
             uploadToken.setStatus(TokenStatus.FAILED);
             uploadToken.setError(S3_UPLOAD_FAILED);
             redisRepository.save(uploadToken);
             objectMetadataService.updateStatus(uploadToken.getObjectId(), ObjectStatus.FAILED, S3_UPLOAD_FAILED);
+        } finally {
+            span.end();
         }
     }
 

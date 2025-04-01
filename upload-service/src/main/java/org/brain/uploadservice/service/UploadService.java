@@ -1,5 +1,6 @@
 package org.brain.uploadservice.service;
 
+import io.opentelemetry.context.Context;
 import jakarta.annotation.Resource;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;

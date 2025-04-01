@@ -69,6 +69,57 @@ services:
       - "5540:5540"
     volumes:
       - redis-insight:/data
+
+
+  collector:
+    container_name: collector
+    image: otel/opentelemetry-collector-contrib:0.91.0
+    command:
+      - --config=/etc/otelcol-contrib/otel-collector.yml
+    volumes:
+      - ./docker/collector/otel-collector.yml:/etc/otelcol-contrib/otel-collector.yml
+    restart: always
+    ports:
+      - "4317:4317" # OTLP gRPC receiver
+      - "4318:4318"
+      - "8889" # Prometheus exporter metrics
+    depends_on:
+      - zipkin-all-in-one
+
+  prometheus:
+    container_name: prometheus
+    image: prom/prometheus
+    volumes:
+      - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --enable-feature=exemplar-storage
+      - --web.enable-remote-write-receiver
+    restart: always
+    ports:
+      - '9090:9090'
+    depends_on:
+      - collector
+
+  grafana:
+    container_name: grafana
+    image: grafana/grafana
+    volumes:
+      - ./docker/grafana/grafana-datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml
+    restart: always
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
+      - zipkin-all-in-one
+
+  zipkin-all-in-one:
+    container_name: zipkin
+    image: openzipkin/zipkin:latest
+    restart: always
+    ports:
+      - "9411:9411"
+
   # healthcheck: http://localhost:5540/api/health/
 
 #  upload-service:
@@ -78,6 +129,12 @@ services:
 #    container_name: upload-service
 #    ports:
 #      - "8080:8080"
+#    environment:
+#      OTEL_SERVICE_NAME: "upload-service"
+#      OTEL_RESOURCE_ATTRIBUTES: "service=upload-service,env=dev"
+#      OTEL_EXPORTER_OTLP_ENDPOINT: "http://collector:4317"
+#      # Logs are disabled by default
+#      OTEL_LOGS_EXPORTER: "otlp"
 #    depends_on:
 #      - neo4j
 #      - redis

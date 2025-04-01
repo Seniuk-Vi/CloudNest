@@ -41,7 +41,7 @@ public class KafkaCompressionListener {
 
         // upload compressed data to main bucket
         try {
-            uploadToMainBucketWithBackOff(compressedData, message.getFilePath());
+            s3Service.uploadToMainBucket(compressedData, message.getFilePath());
         } catch (S3UploadFailed e) {
             log.error("Failed to upload compressed data to main bucket for file: {}", message.getFilePath(), e);
             message.setStatus(TokenStatus.FAILED);

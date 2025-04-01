@@ -1,6 +1,7 @@
 package org.brain.uploadservice.service;
 
 
+import io.opentelemetry.context.Context;
 import jakarta.annotation.PreDestroy;
 import lombok.extern.slf4j.Slf4j;
 import org.brain.uploadservice.exception.S3UploadFailed;
@@ -31,7 +32,7 @@ public class S3Service {
         this.s3Client = s3Client;
         this.STAGING_BUCKET = STAGING_BUCKET;
 
-        this.executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+        this.executorService = Context.taskWrapping(Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()));
     }
 
     public void uploadToStagingBucket(byte[] file, String key) throws S3UploadFailed {

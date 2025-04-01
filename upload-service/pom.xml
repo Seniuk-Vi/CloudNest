@@ -71,6 +71,24 @@
             <artifactId>spring-cloud-aws-starter-s3</artifactId>
             <version>3.3.0</version>
         </dependency>
+
+        <!-- Prerequisite for observability -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>io.opentelemetry.instrumentation</groupId>
+            <artifactId>opentelemetry-spring-boot-starter</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>io.opentelemetry.instrumentation</groupId>
+            <artifactId>opentelemetry-aws-sdk-2.2-autoconfigure</artifactId>
+            <version>2.14.0-alpha</version>
+        </dependency>
+
     </dependencies>
 
     <build>

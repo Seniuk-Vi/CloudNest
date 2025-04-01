@@ -28,3 +28,17 @@ spring:
                     main: ${SPRING_AWS_S3_BUCKET_MAIN:main-bucket-nest}
 
                 region: ${SPRING_AWS_REGION:eu-central-1}
+
+otel:
+    service:
+        name: compression-worker
+    resource:
+        attributes:
+          service.name: compression-worker
+          env: dev
+    exporter:
+        otlp:
+            endpoint: http://localhost:4317
+            protocol: grpc
+    logs:
+        exporter: otlp

@@ -30,5 +30,19 @@ spring:
             s3:
                 bucket:
                     staging: ${SPRING_AWS_S3_BUCKET_STAGING:staging-bucket-nest}
-
                 region: ${SPRING_AWS_REGION:eu-central-1}
+
+otel:
+    service:
+        name: upload-service
+    resource:
+        attributes:
+            service.name: upload-service
+            env: dev
+    exporter:
+        otlp:
+            endpoint: http://localhost:4317
+            protocol: grpc
+
+    logs:
+        exporter: otlp

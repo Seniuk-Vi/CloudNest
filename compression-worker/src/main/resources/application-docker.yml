@@ -26,3 +26,16 @@ spring:
             s3:
                 bucket:
                     staging: ${SPRING_AWS_S3_BUCKET_STAGING:staging-bucket-nest}
+
+otel:
+    service:
+        name: compression-worker
+    resource:
+        attributes:
+            service.name: compression-worker
+            env: dev
+    exporter:
+        otlp:
+            endpoint: http://collector:4317
+    logs:
+        exporter: otlp
