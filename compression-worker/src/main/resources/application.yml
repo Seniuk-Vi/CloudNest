@@ -20,6 +20,13 @@ spring:
             file-compression-group-id: ${SPRING_KAFKA_GROUP_ID:compression-worker}
         consumer:
             auto-offset-reset: earliest
+            enable-auto-commit: false
+            properties:
+                max.poll.interval.ms: 300000
+                retry.backoff.ms: 1000
+        listener:
+            ack-mode: MANUAL
+
     cloud:
         aws:
             s3:
@@ -28,17 +35,3 @@ spring:
                     main: ${SPRING_AWS_S3_BUCKET_MAIN:main-bucket-nest}
 
                 region: ${SPRING_AWS_REGION:eu-central-1}
-
-otel:
-    service:
-        name: compression-worker
-    resource:
-        attributes:
-          service.name: compression-worker
-          env: dev
-    exporter:
-        otlp:
-            endpoint: http://localhost:4317
-            protocol: grpc
-    logs:
-        exporter: otlp

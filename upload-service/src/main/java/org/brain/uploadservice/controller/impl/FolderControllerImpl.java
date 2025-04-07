@@ -3,7 +3,7 @@ package org.brain.uploadservice.controller.impl;
 import lombok.AllArgsConstructor;
 import org.brain.uploadservice.controller.FolderController;
 import org.brain.uploadservice.payload.FolderResponse;
-import org.brain.uploadservice.service.FolderService;
+import org.brain.uploadservice.service.impl.FolderService;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.UUID;

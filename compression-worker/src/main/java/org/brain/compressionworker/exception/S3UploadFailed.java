@@ -7,4 +7,9 @@ public class S3UploadFailed extends Exception {
     public S3UploadFailed(Exception e) {
         super(message, e);
     }
+
+    public S3UploadFailed(String message) {
+        super(message);
+    }
+
 }

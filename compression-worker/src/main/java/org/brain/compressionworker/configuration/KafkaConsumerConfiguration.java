@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
+import org.springframework.kafka.listener.ContainerProperties;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 
 import java.util.HashMap;
@@ -38,8 +39,13 @@ public class KafkaConsumerConfiguration {
         configProps.put(
                 JsonDeserializer.TRUSTED_PACKAGES,
                 "*");
+        // enable manual acknowledgment
+        configProps.put(
+                ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG,
+                false);
 
-        return new DefaultKafkaConsumerFactory<>(configProps, new StringDeserializer(), new JsonDeserializer<>(UploadToken.class));
+        ConsumerFactory<String, UploadToken> consumerFactory = new DefaultKafkaConsumerFactory<>(configProps, new StringDeserializer(), new JsonDeserializer<>(UploadToken.class));
+        return consumerFactory;
     }
 
     @Bean
@@ -49,6 +55,7 @@ public class KafkaConsumerConfiguration {
                 new ConcurrentKafkaListenerContainerFactory<>();
 
         factory.setConsumerFactory(consumerFactory());
+        factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL);
         return factory;
     }
 }

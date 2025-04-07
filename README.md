@@ -27,3 +27,9 @@ http://localhost:3000
 # Zipkin
 
 http://localhost:9411
+
+
+# run with otel agent
+
+java -javaagent:opentelemetry-javaagent.jar  -jar upload-service/target/upload-service-0.0.1-SNAPSHOT.jar
+java -javaagent:opentelemetry-javaagent.jar  -jar compression-worker/target/compression-worker-0.0.1-SNAPSHOT.jar

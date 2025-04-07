@@ -3,7 +3,7 @@ package org.brain.uploadservice.controller.impl;
 import lombok.AllArgsConstructor;
 import org.brain.uploadservice.controller.NestController;
 import org.brain.uploadservice.payload.NestResponse;
-import org.brain.uploadservice.service.NestService;
+import org.brain.uploadservice.service.impl.NestService;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.UUID;
