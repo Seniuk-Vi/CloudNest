@@ -35,3 +35,8 @@ spring:
                     main: ${SPRING_AWS_S3_BUCKET_MAIN:main-bucket-nest}
 
                 region: ${SPRING_AWS_REGION:eu-central-1}
+
+    endpoints:
+        web:
+           exposure:
+               include: "*" # Expose all endpoints

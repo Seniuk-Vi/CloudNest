@@ -32,13 +32,7 @@ spring:
                     staging: ${SPRING_AWS_S3_BUCKET_STAGING:staging-bucket-nest}
                 region: ${SPRING_AWS_REGION:eu-central-1}
 
-
-logging:
-    level:
-        software:
-            amazon:
-                awssdk:
-                    services:
-                        s3: DEBUG
-                    transfer:
-                        s3: DEBUG
+    endpoints:
+        web:
+            exposure:
+                include: "*" # Expose all endpoints
