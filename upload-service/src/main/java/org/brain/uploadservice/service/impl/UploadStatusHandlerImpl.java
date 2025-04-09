@@ -1,14 +1,13 @@
-package org.brain.compressionworker.service.impl;
+package org.brain.uploadservice.service.impl;
 
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.brain.compressionworker.model.ObjectStatus;
-import org.brain.compressionworker.model.TokenStatus;
-import org.brain.compressionworker.model.UploadToken;
-import org.brain.compressionworker.service.ObjectMetadataService;
-import org.brain.compressionworker.service.UploadStatusHandler;
-import org.brain.compressionworker.service.UploadTokenService;
+import org.brain.uploadservice.model.ObjectStatus;
+import org.brain.uploadservice.model.TokenStatus;
+import org.brain.uploadservice.model.UploadToken;
+import org.brain.uploadservice.service.UploadStatusHandler;
+import org.brain.uploadservice.service.UploadTokenService;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -22,7 +21,7 @@ public class UploadStatusHandlerImpl implements UploadStatusHandler {
     @Override
     @Transactional
     public void handleUploadStatus(UploadToken uploadToken, String errorMessage, ObjectStatus objectStatus, TokenStatus tokenStatus) {
-        log.info("Update status for token {}: status: {}, error: {}", uploadToken.getUploadToken(), objectStatus, errorMessage);
+        log.error("Update status for token {}: status: {}, error: {}", uploadToken.getUploadToken(), objectStatus, errorMessage);
         uploadTokenService.updateUploadTokenStatus(uploadToken, tokenStatus, errorMessage);
         objectMetadataService.updateStatus(uploadToken.getObjectId(), objectStatus, errorMessage);
 

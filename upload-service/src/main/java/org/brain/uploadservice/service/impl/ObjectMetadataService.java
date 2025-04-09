@@ -29,7 +29,7 @@ public class ObjectMetadataService {
 
     public ObjectResponse createObject(String name, UUID parentFolderId, Long size) {
         Folder parentFolder = folderRepository.findById(parentFolderId)
-                .orElseThrow(() -> new RuntimeException("Parent folder not found"));
+                .orElseThrow(() -> new RuntimeException("Parent folder not found for id: " + parentFolderId));
 
         FileObject fileObject = new FileObject(parentFolder.getUserId(), name, size);
         fileObject.setStatus(ObjectStatus.UPLOADING);

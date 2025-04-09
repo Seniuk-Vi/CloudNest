@@ -1,34 +1,29 @@
 package org.brain.uploadservice.service.impl;
 
-import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.brain.uploadservice.model.ObjectStatus;
 import org.brain.uploadservice.model.TokenStatus;
 import org.brain.uploadservice.model.UploadToken;
-import org.brain.uploadservice.repository.redis.RedisRepository;
+import org.brain.uploadservice.service.UploadStatusHandler;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @Slf4j
 @AllArgsConstructor
-public class AsyncStageFileService {
-
-    private final ObjectMetadataService objectMetadataService;
-
-    private final RedisRepository redisRepository;
+public class StageFileService {
 
     private final S3ServiceTransferManagerImpl s3Service;
 
     private final KafkaPublisher kafkaPublisher;
 
+    private final UploadStatusHandler uploadStatusHandler;
+
     private final String S3_UPLOAD_FAILED = "S3 upload failed";
 
-
-    @Transactional
     public void stageFile(MultipartFile file, UploadToken uploadToken, String groupId) {
-
         try {
             log.info("Staging file with upload token: {}", uploadToken.getUploadToken());
 
@@ -39,17 +34,15 @@ public class AsyncStageFileService {
             log.debug("Staged file with upload token: {}", uploadToken.getUploadToken());
 
             uploadToken.setStatus(TokenStatus.WAITING_FOR_COMPRESSING);
-            redisRepository.save(uploadToken);
+            uploadStatusHandler.handleUploadTokenStatus(uploadToken, TokenStatus.WAITING_FOR_COMPRESSING, null);
             log.debug("Updated status for upload token: {} to WAITING_FOR_COMPRESSING", uploadToken);
 
             kafkaPublisher.publishCompressionMessage(uploadToken, groupId);
             log.info("Published compression message for upload token: {}", uploadToken);
         } catch (Exception e) {
             log.error("Failed to stage file with upload token: {}. Exception: {}", uploadToken.getUploadToken(), e.getMessage());
-            uploadToken.setStatus(TokenStatus.FAILED);
-            uploadToken.setError(S3_UPLOAD_FAILED);
-            redisRepository.save(uploadToken);
-            objectMetadataService.updateStatus(uploadToken.getObjectId(), ObjectStatus.FAILED, S3_UPLOAD_FAILED);
+            uploadStatusHandler.handleUploadStatus(uploadToken, S3_UPLOAD_FAILED, ObjectStatus.FAILED, TokenStatus.FAILED);
+            throw new RuntimeException("Failed to stage file", e);
         }
     }
 

@@ -2,6 +2,8 @@ package org.brain.compressionworker.service;
 
 import com.github.luben.zstd.Zstd;
 import com.github.luben.zstd.ZstdOutputStream;
+import io.micrometer.core.annotation.Timed;
+import io.micrometer.core.instrument.DistributionSummary;
 import io.micrometer.core.instrument.LongTaskTimer;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
@@ -18,36 +20,26 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
+import java.util.function.DoubleSupplier;
 
 @Service
 @Slf4j
 public class CompressionService {
 
     private final TempFileService tempFileService;
-    private final Meter meter;
-    private final DoubleHistogram compressionTimeHistogram;
     private final int COMPRESSION_LEVEL = 11;
     private final int COMPRESSION_WORKERS = 4;
 
 
-    CompressionService(TempFileService tempFileService, OpenTelemetry openTelemetry) {
+    CompressionService(TempFileService tempFileService) {
         this.tempFileService = tempFileService;
-        // Retrieve the global Meter instance provided by the agent
-        this.meter = openTelemetry.getMeter("compression-worker");
-
-        // Define a custom Histogram metric for compression time in seconds
-        this.compressionTimeHistogram = meter.histogramBuilder("compression_time")
-                .setDescription("Time taken to compress files")
-                .setUnit("seconds")
-                .build();
     }
 
+    @Timed(value = "compression.time", description = "Time taken to compress files", histogram = true)
     public File compress(File inputFile, String filePath) throws IOException {
-        long start = System.currentTimeMillis();
         try {
             // Create a temporary file for storing compressed data
             File tempFile = tempFileService.createCompressionTempFile(filePath);
-            tempFile.deleteOnExit(); // Delete temporary file on JVM exit
 
             try (FileInputStream fis = new FileInputStream(inputFile);
                  FileOutputStream fos = new FileOutputStream(tempFile);
@@ -74,10 +66,6 @@ public class CompressionService {
                 log.error("Failed to delete temporary file: {}", inputFile.getAbsolutePath());
             }
             throw e;
-        } finally {
-            double duration = (System.currentTimeMillis() - start) / 1000.; // Convert to seconds
-            compressionTimeHistogram.record(duration); // Stop the timer
-            log.info("Compression completed for file: {} in: {} seconds", inputFile.getAbsolutePath(), duration);
         }
     }
 }

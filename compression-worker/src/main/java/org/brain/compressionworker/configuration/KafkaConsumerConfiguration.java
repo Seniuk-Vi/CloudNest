@@ -23,6 +23,7 @@ public class KafkaConsumerConfiguration {
 
     @Bean
     public ConsumerFactory<String, UploadToken> consumerFactory() {
+        System.out.println("Bootstrap servers: " + applicationProperties.getKafka().getBootstrapServers());
         Map<String, Object> configProps = new HashMap<>();
         configProps.put(
                 ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG,
@@ -56,6 +57,7 @@ public class KafkaConsumerConfiguration {
 
         factory.setConsumerFactory(consumerFactory());
         factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL);
+        factory.setConcurrency(8);
         return factory;
     }
 }
