@@ -1,161 +1,167 @@
 services:
-  neo4j:
-    image: neo4j:2025.02.0
-    volumes:
-      - neo4j_logs:/logs
-      - neo4j_config:/config
-      - neo4j_data:/data
-      - neo4j_plugins:/plugins
-    environment:
-      - NEO4J_AUTH=neo4j/password
-      - NEO4J_PLUGINS=["apoc", "graph-data-science"]
-    ports:
-      - "7474:7474"
-      - "7687:7687"
-    restart: always
+    neo4j:
+        image: neo4j:2025.02.0
+        volumes:
+            - neo4j_logs:/logs
+            - neo4j_config:/config
+            - neo4j_data:/data
+            - neo4j_plugins:/plugins
+        environment:
+            - NEO4J_AUTH=neo4j/password
+            - NEO4J_PLUGINS=["apoc", "graph-data-science"]
+        ports:
+            - "7474:7474"
+            - "7687:7687"
+        restart: always
 
-  kafka:
-    image: apache/kafka-native
-    ports:
-      - "9092:9092"
-    environment:
-      # Configure listeners for both docker and host communication
-      KAFKA_LISTENERS: CONTROLLER://localhost:9091,HOST://0.0.0.0:9092,DOCKER://0.0.0.0:9093
-      KAFKA_ADVERTISED_LISTENERS: HOST://localhost:9092,DOCKER://kafka:9093
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,DOCKER:PLAINTEXT,HOST:PLAINTEXT
+    kafka:
+        image: apache/kafka-native
+        ports:
+            - "9092:9092"
+        environment:
+            # Configure listeners for both docker and host communication
+            KAFKA_LISTENERS: CONTROLLER://localhost:9091,HOST://0.0.0.0:9092,DOCKER://0.0.0.0:9093
+            KAFKA_ADVERTISED_LISTENERS: HOST://localhost:9092,DOCKER://kafka:9093
+            KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,DOCKER:PLAINTEXT,HOST:PLAINTEXT
 
-      # Settings required for KRaft mode
-      KAFKA_NODE_ID: 1
-      KAFKA_PROCESS_ROLES: broker,controller
-      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
-      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@localhost:9091
+            # Settings required for KRaft mode
+            KAFKA_NODE_ID: 1
+            KAFKA_PROCESS_ROLES: broker,controller
+            KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+            KAFKA_CONTROLLER_QUORUM_VOTERS: 1@localhost:9091
 
-      # Listener to use for broker-to-broker communication
-      KAFKA_INTER_BROKER_LISTENER_NAME: DOCKER
+            # Listener to use for broker-to-broker communication
+            KAFKA_INTER_BROKER_LISTENER_NAME: DOCKER
 
-      # Required for a single node cluster
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+            # Required for a single node cluster
+            KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
 
-  kafka-ui:
-    image: kafbat/kafka-ui:main
-    ports:
-      - 3030:8080
-    environment:
-      DYNAMIC_CONFIG_ENABLED: "true"
-      KAFKA_CLUSTERS_0_NAME: local
-      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9093
-    depends_on:
-      - kafka
+    kafka-ui:
+        image: kafbat/kafka-ui:main
+        ports:
+            - 3030:8080
+        environment:
+            DYNAMIC_CONFIG_ENABLED: "true"
+            KAFKA_CLUSTERS_0_NAME: local
+            KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9093
+        depends_on:
+            - kafka
 
-  redis:
-    image: redis:latest
-    container_name: redis
-    environment:
-      - REDIS_PASSWORD=password
-      - REDIS_USER=redis
-      - REDIS_USER_PASSWORD=password
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis_data:/data
-    restart: unless-stopped
-    tty: true
-    stdin_open: true
+    redis:
+        image: redis:latest
+        container_name: redis
+        environment:
+            - REDIS_PASSWORD=password
+            - REDIS_USER=redis
+            - REDIS_USER_PASSWORD=password
+        ports:
+            - "6379:6379"
+        volumes:
+            - redis_data:/data
+        restart: unless-stopped
+        tty: true
+        stdin_open: true
 
-  redis-insight:
-    image: redis/redisinsight:latest
-    restart: always
-    ports:
-      - "5540:5540"
-    volumes:
-      - redis-insight:/data
+    redis-insight:
+        image: redis/redisinsight:latest
+        restart: always
+        ports:
+            - "5540:5540"
+        volumes:
+            - redis-insight:/data
 
 
-  collector:
-    container_name: collector
-    image: otel/opentelemetry-collector-contrib:0.91.0
-    command:
-      - --config=/etc/otelcol-contrib/otel-collector.yml
-    volumes:
-      - ./docker/collector/otel-collector.yml:/etc/otelcol-contrib/otel-collector.yml
-    restart: always
-    ports:
-      - "4317:4317" # OTLP gRPC receiver
-      - "4318:4318"
-      - "8889" # Prometheus exporter metrics
-    depends_on:
-      - zipkin-all-in-one
+    collector:
+        container_name: collector
+        image: otel/opentelemetry-collector-contrib:0.91.0
+        command:
+            - --config=/etc/otelcol-contrib/otel-collector.yml
+        volumes:
+            - ./docker/collector/otel-collector.yml:/etc/otelcol-contrib/otel-collector.yml
+        restart: always
+        ports:
+            - "4317:4317" # OTLP gRPC receiver
+            - "4318:4318"
+            - "8889" # Prometheus exporter metrics
+        depends_on:
+            - zipkin-all-in-one
 
-  prometheus:
-    container_name: prometheus
-    image: prom/prometheus
-    volumes:
-      - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
-    command:
-      - --config.file=/etc/prometheus/prometheus.yml
-      - --enable-feature=exemplar-storage
-      - --web.enable-remote-write-receiver
-    restart: always
-    ports:
-      - '9090:9090'
-    depends_on:
-      - collector
+    prometheus:
+        container_name: prometheus
+        image: prom/prometheus
+        volumes:
+            - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+        command:
+            - --config.file=/etc/prometheus/prometheus.yml
+            - --enable-feature=exemplar-storage
+            - --web.enable-remote-write-receiver
+        restart: always
+        ports:
+            - '9090:9090'
+        depends_on:
+            - collector
 
-  grafana:
-    container_name: grafana
-    image: grafana/grafana
-    volumes:
-      - ./docker/grafana/grafana-datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml
-    restart: always
-    ports:
-      - "3000:3000"
-    depends_on:
-      - prometheus
-      - zipkin-all-in-one
+    grafana:
+        container_name: grafana
+        image: grafana/grafana
+        volumes:
+            - ./docker/grafana/grafana-datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml
+        restart: always
+        ports:
+            - "3000:3000"
+        depends_on:
+            - prometheus
+            - zipkin-all-in-one
 
-  zipkin-all-in-one:
-    container_name: zipkin
-    image: openzipkin/zipkin:latest
-    restart: always
-    ports:
-      - "9411:9411"
+    zipkin-all-in-one:
+        container_name: zipkin
+        image: openzipkin/zipkin:latest
+        restart: always
+        ports:
+            - "9411:9411"
 
-  # healthcheck: http://localhost:5540/api/health/
+    # healthcheck: http://localhost:5540/api/health/
 
-#  upload-service:
-#    build:
-#      context: ./upload-service
-#      dockerfile: Dockerfile
-#    container_name: upload-service
-#    ports:
-#      - "8080:8080"
-#    environment:
-#      OTEL_SERVICE_NAME: "upload-service"
-#      OTEL_RESOURCE_ATTRIBUTES: "service=upload-service,env=dev"
-#      OTEL_EXPORTER_OTLP_ENDPOINT: "http://collector:4317"
-#      # Logs are disabled by default
-#      OTEL_LOGS_EXPORTER: "otlp"
-#    depends_on:
-#      - neo4j
-#      - redis
-#      - kafka
-
-#  compression-worker:
-#    build:
-#      context: ./compression-worker
-#      dockerfile: Dockerfile
-#    container_name: compression-worker
-#    ports:
-#      - "8081:8080"
-#    depends_on:
-#      - neo4j
-#      - redis
-#      - kafka
+#
+#    upload-service:
+#        build:
+#            context: ./upload-service
+#            dockerfile: Dockerfile
+#        container_name: upload-service
+#        ports:
+#            - "8081:8081"
+#        environment:
+#            SPRING_PROFILES_ACTIVE: docker
+#            SPRING_REDIS_HOST: redis
+#            SPRING_REDIS_PORT: 6379
+#            OTEL_EXPORTER_OTLP_ENDPOINT: http://collector:4318
+#            AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+#            AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+#        depends_on:
+#            - neo4j
+#            - redis
+#            - kafka
+#    compression-worker:
+#        build:
+#            context: ./compression-worker
+#            dockerfile: Dockerfile
+#        container_name: compression-worker
+#        ports:
+#            - "8080:8080"
+#        environment:
+#            SPRING_PROFILES_ACTIVE: docker
+#            OTEL_EXPORTER_OTLP_ENDPOINT: http://collector:4318
+#            AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+#            AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+#        depends_on:
+#            - neo4j
+#            - redis
+#            - kafka
 
 volumes:
-  neo4j_logs:
-  neo4j_config:
-  neo4j_data:
-  neo4j_plugins:
-  redis_data:
-  redis-insight:
+    neo4j_logs:
+    neo4j_config:
+    neo4j_data:
+    neo4j_plugins:
+    redis_data:
+    redis-insight:
