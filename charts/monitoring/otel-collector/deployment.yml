@@ -1,0 +1,90 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: collector
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+            app: collector
+    template:
+        metadata:
+            labels:
+                app: collector
+        spec:
+            containers:
+                - name: collector
+                  image: otel/opentelemetry-collector-contrib:0.91.0
+                  args: ["--config", "/etc/otelcol-contrib/otel-collector.yml"]
+                  volumeMounts:
+                      - name: otel-config
+                        mountPath: /etc/otelcol-contrib/otel-collector.yml
+                        subPath: otel-collector.yml
+                  ports:
+                      - containerPort: 4317
+                      - containerPort: 4318
+                      - containerPort: 8889
+            volumes:
+                - name: otel-config
+                  configMap:
+                      name: otel-config
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+    name: otel-config
+data:
+    otel-collector.yml: |
+        receivers:
+            otlp:
+                protocols:
+                    grpc:
+                        endpoint: 0.0.0.0:4317
+                    http:
+                        endpoint: 0.0.0.0:4318
+        
+        processors:
+            batch:
+                send_batch_max_size: 1000
+                send_batch_size: 100
+                timeout: 10s
+        
+        exporters:
+            prometheusremotewrite:
+                endpoint: "http://prometheus:9090/api/v1/write"
+            
+            prometheus:
+                endpoint: "0.0.0.0:8889"
+                enable_open_metrics: true
+            
+            zipkin:
+                endpoint: http://zipkin:9411/api/v2/spans
+        
+        service:
+            pipelines:
+                metrics:
+                    receivers: [otlp]
+                    processors: [batch]
+                    exporters: [prometheusremotewrite]
+                traces:
+                    receivers: [otlp]
+                    processors: [batch]
+                    exporters: [zipkin]
+---
+apiVersion: v1
+kind: Service
+metadata:
+    name: collector
+spec:
+    ports:
+        - name: otlp-grpc
+          port: 4317
+          targetPort: 4317
+        - name: otlp-http
+          port: 4318
+          targetPort: 4318
+        - name: prometheus-metrics
+          port: 8889
+          targetPort: 8889
+    selector:
+        app: collector

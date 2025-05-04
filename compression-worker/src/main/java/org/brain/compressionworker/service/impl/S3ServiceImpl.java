@@ -63,22 +63,23 @@ public class S3ServiceImpl implements S3Service {
             }
 
             // Create the AsyncRequestBody from the file's InputStream
-            AsyncRequestBodyFromInputStreamConfiguration requestBodyConf = AsyncRequestBodyFromInputStreamConfiguration.builder()
-                    .contentLength(file.length()) // Set the correct content length
-                    .inputStream(new FileInputStream(file)) // Read the file content
-                    .executor(executorService) // Use the executor service for asynchronous processing
-                    .build();
+            AsyncRequestBodyFromInputStreamConfiguration requestBodyConf =
+                    AsyncRequestBodyFromInputStreamConfiguration.builder()
+                            .contentLength(file.length())
+                            .inputStream(new FileInputStream(file))
+                            .executor(executorService)
+                            .build();
             AsyncRequestBody requestBody = AsyncRequestBody.fromInputStream(requestBodyConf);
 
             // Build the UploadRequest
             UploadRequest uploadRequest = UploadRequest.builder()
-                    .requestBody(requestBody) // Provide the file content
+                    .requestBody(requestBody)
                     .putObjectRequest(builder -> builder.bucket(MAIN_BUCKET).key(key))
                     .build();
 
             // Start the upload
             Upload fileUpload = s3TransferManager.upload(uploadRequest);
-            fileUpload.completionFuture().join(); // Block until upload is complete
+            fileUpload.completionFuture().join();
 
             log.info("File uploaded successfully to S3: {}", key);
         } catch (Exception e) {

@@ -1,0 +1,74 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: upload-service
+    labels:
+        app: upload-service
+        environment: production
+spec:
+    replicas: 2
+    selector:
+        matchLabels:
+            app: upload-service
+    template:
+        metadata:
+            labels:
+                app: upload-service
+        spec:
+            containers:
+                -   name: upload-service
+                    image: vitaliiseniuk/upload-service:latest
+                    ports:
+                        - containerPort: 8081
+                    env:
+                        -   name: SPRING_PROFILES_ACTIVE
+                            valueFrom:
+                                configMapKeyRef:
+                                    name: upload-service-config
+                                    key: SPRING_PROFILES_ACTIVE
+                        -   name: SPRING_REDIS_HOST
+                            valueFrom:
+                                configMapKeyRef:
+                                    name: upload-service-config
+                                    key: SPRING_REDIS_HOST
+                        -   name: SPRING_REDIS_PORT
+                            valueFrom:
+                                configMapKeyRef:
+                                    name: upload-service-config
+                                    key: SPRING_REDIS_PORT
+                        -   name: SPRING_NEO4J_URI
+                            valueFrom:
+                                configMapKeyRef:
+                                    name: upload-service-config
+                                    key: SPRING_NEO4J_URI
+                        -   name: OTEL_EXPORTER_OTLP_ENDPOINT
+                            value: http://collector:4318
+                        -   name: AWS_ACCESS_KEY_ID
+                            valueFrom:
+                                secretKeyRef:
+                                    name: aws-secrets
+                                    key: access-key
+                        -   name: AWS_SECRET_ACCESS_KEY
+                            valueFrom:
+                                secretKeyRef:
+                                    name: aws-secrets
+                                    key: secret-key
+                    readinessProbe:
+                        httpGet:
+                            path: /actuator/health
+                            port: 8081
+                        initialDelaySeconds: 5
+                        periodSeconds: 10
+                    livenessProbe:
+                        httpGet:
+                            path: /actuator/health
+                            port: 8081
+                        initialDelaySeconds: 10
+                        periodSeconds: 15
+                    resources:
+                        requests:
+                            memory: "512Mi"
+                            cpu: "1000m"
+                        limits:
+                            memory: "1024Mi"
+                            cpu: "2000m"

@@ -1,10 +1,8 @@
-package org.brain.uploadservice.configuration;
+package org.brain.compressionworker.configuration;
 
-import lombok.AllArgsConstructor;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
-import org.brain.uploadservice.model.UploadToken;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.brain.compressionworker.model.UploadToken;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
 import org.springframework.context.annotation.Bean;
@@ -18,10 +16,6 @@ import java.util.Map;
 
 @Configuration
 public class KafkaProducerConfiguration {
-
-
-    @Value(value = "${spring.kafka.topic.file-compression}")
-    public String fileCompressionTopic;
 
     @Bean
     public ProducerFactory<String, UploadToken> producerFactory(KafkaProperties kafkaProperties) {

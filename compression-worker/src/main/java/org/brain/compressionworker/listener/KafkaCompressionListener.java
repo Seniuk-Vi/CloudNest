@@ -3,6 +3,7 @@ package org.brain.compressionworker.listener;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.brain.compressionworker.configuration.ApplicationProperties;
 import org.brain.compressionworker.exception.CompressionFailed;
 import org.brain.compressionworker.exception.S3DownloadFailed;
 import org.brain.compressionworker.exception.S3UploadFailed;
@@ -14,9 +15,16 @@ import org.brain.compressionworker.service.CompressionService;
 import org.brain.compressionworker.service.ObjectMetadataService;
 import org.brain.compressionworker.service.UploadStatusHandler;
 import org.brain.compressionworker.service.impl.S3ServiceImpl;
+import org.springframework.boot.availability.ApplicationAvailabilityBean;
+import org.springframework.kafka.annotation.DltHandler;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.annotation.RetryableTopic;
 import org.springframework.kafka.support.Acknowledgment;
+import org.springframework.kafka.support.KafkaHeaders;
+import org.springframework.messaging.handler.annotation.Header;
+import org.springframework.retry.annotation.Backoff;
 import org.springframework.stereotype.Service;
+import software.amazon.awssdk.transfer.s3.model.Upload;
 
 import java.io.File;
 import java.io.IOException;
@@ -31,10 +39,22 @@ public class KafkaCompressionListener {
     private final CompressionService compressionService;
     private final S3ServiceImpl s3Service;
     private final UploadStatusHandler uploadStatusHandler;
+    private final ApplicationProperties applicationProperties;
+    private final ApplicationAvailabilityBean applicationAvailability;
 
+    @RetryableTopic(
+            attempts = "${spring.kafka.retry.attempts}",
+            backoff = @Backoff(delay = 3000, multiplier = 1.5, maxDelay = 15000),
+            exclude = {NullPointerException.class},
+            include = {
+                    S3DownloadFailed.class,
+                    S3UploadFailed.class,
+                    CompressionFailed.class
+            }
+    )
     @KafkaListener(topics = "${spring.kafka.topic.file-compression}")
     @Transactional
-    public void fileCompressionListener(UploadToken message, Acknowledgment acknowledgment) throws S3DownloadFailed {
+    public void fileCompressionListener(UploadToken message, Acknowledgment acknowledgment) throws S3DownloadFailed, CompressionFailed {
 
         log.info("Received message: {}", message);
         try {
@@ -46,7 +66,7 @@ public class KafkaCompressionListener {
             try {
                 compressedData = compressObject(objectData, message);
             } catch (CompressionFailed e) {
-                throw new RuntimeException(e);
+                throw new CompressionFailed(e);
             }
 
             // upload compressed data to main bucket
@@ -54,15 +74,28 @@ public class KafkaCompressionListener {
 
 
             // update status to UPLOADED
-            uploadStatusHandler.handleUploadStatus(message, null, ObjectStatus.UPLOADED, TokenStatus.UPLOADED);
+            uploadStatusHandler.handleUploadStatus(
+                    message,
+                    null,
+                    ObjectStatus.UPLOADED,
+                    TokenStatus.UPLOADED
+            );
             acknowledgment.acknowledge();
         } catch (Exception e) {
-            // Log the error and do not acknowledge the message
-            log.error("Error processing message: {}. Message will not be acknowledged and will be retried.", message, e);
-
-            // Optionally, handle specific exceptions (e.g., update status to FAILED)
-            uploadStatusHandler.handleUploadStatus(message, e.getMessage(), ObjectStatus.FAILED, TokenStatus.FAILED);
+            log.error("Error processing message: {}.", message);
+            throw new CompressionFailed(e);
         }
+    }
+
+    @DltHandler
+    public void handleDltCompression(
+            UploadToken token, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
+        log.info("Event on dlt topic={}, payload={}", topic, token);
+        uploadStatusHandler.handleUploadStatus(
+                token,
+                "Failed to compress message",
+                ObjectStatus.FAILED,
+                TokenStatus.FAILED);
     }
 
     private File compressObject(File file, UploadToken uploadToken) throws CompressionFailed {

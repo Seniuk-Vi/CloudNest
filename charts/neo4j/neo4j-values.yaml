@@ -1,0 +1,41 @@
+# Authentication settings
+auth:
+    password: password # Replace with your desired password
+
+# Persistence settings
+persistence:
+    enabled: true
+    mountPath: /bitnami/neo4j
+    size: 10Gi
+    accessModes:
+        - ReadWriteOnce
+    storageClass: "" # Use default storage class
+
+# Service settings
+service:
+    type: ClusterIP # Use ClusterIP for internal communication
+    ports:
+        bolt: 7687
+        http: 7474
+    annotations: {}
+
+# Network policy settings
+networkPolicy:
+    enabled: true
+    allowExternal: true
+
+
+# Pod affinity and tolerations
+podAffinityPreset: soft
+podAntiAffinityPreset: soft
+nodeAffinityPreset:
+    type: soft
+    key: node-role.kubernetes.io/worker
+    values:
+        - true
+tolerations: []
+
+
+# Backup and restore settings
+volumePermissions:
+    enabled: true

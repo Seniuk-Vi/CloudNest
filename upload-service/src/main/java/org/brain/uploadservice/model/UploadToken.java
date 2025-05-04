@@ -35,5 +35,6 @@ public class UploadToken {
         this.filePath = null;
         this.percentage = 0;
         this.error = null;
+        this.ttl = 3600L; // 1 hour
     }
 }

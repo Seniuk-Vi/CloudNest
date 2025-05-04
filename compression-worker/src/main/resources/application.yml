@@ -22,18 +22,20 @@ spring:
             auto-offset-reset: earliest
             enable-auto-commit: false
             properties:
-                max.poll.interval.ms: 300000
-                retry.backoff.ms: 1000
+                max.poll.interval.ms: 600000 # 10 хвилин для тривалої обробки
         listener:
             ack-mode: MANUAL
-
+        retry:
+            topic:
+                attempts: 3 # Кількість спроб повторної обробки
+                backoff:
+                    delay: 1000 # Затримка між спробами - 1 секунда
     cloud:
         aws:
             s3:
                 bucket:
                     staging: ${SPRING_AWS_S3_BUCKET_STAGING:staging-bucket-nest}
                     main: ${SPRING_AWS_S3_BUCKET_MAIN:main-bucket-nest}
-
                 region: ${SPRING_AWS_REGION:eu-central-1}
 
     endpoints:

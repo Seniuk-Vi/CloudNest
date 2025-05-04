@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+    name: upload-service-config
+    labels:
+        app: upload-service
+        environment: production
+    annotations:
+        purpose: "Configuration for upload-service"
+data:
+    SPRING_PROFILES_ACTIVE: "kub"
+    SPRING_REDIS_HOST: "redis-master.default.svc.cluster.local"
+    SPRING_REDIS_PORT: "6379"
+    SPRING_NEO4J_URI: "bolt://neo4j.default.svc.cluster.local:7687"
+    OTEL_EXPORTER_OTLP_ENDPOINT: "http://collector:4318"

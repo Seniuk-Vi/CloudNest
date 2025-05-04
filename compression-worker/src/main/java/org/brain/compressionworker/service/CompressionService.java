@@ -44,9 +44,9 @@ public class CompressionService {
             try (FileInputStream fis = new FileInputStream(inputFile);
                  FileOutputStream fos = new FileOutputStream(tempFile);
                  ZstdOutputStream zos = new ZstdOutputStream(fos)) {
-                zos.setLevel(COMPRESSION_LEVEL);
-                zos.setWorkers(COMPRESSION_WORKERS);
-                byte[] buffer = new byte[8192]; // 8 KB buffer
+                zos.setLevel(COMPRESSION_LEVEL); // 11 level
+                zos.setWorkers(COMPRESSION_WORKERS); // 4 workers
+                byte[] buffer = new byte[8192];
                 int bytesRead;
                 while ((bytesRead = fis.read(buffer)) != -1) {
                     zos.write(buffer, 0, bytesRead);

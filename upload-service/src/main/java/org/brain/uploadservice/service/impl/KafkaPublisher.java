@@ -19,10 +19,11 @@ public class KafkaPublisher {
 
     private final KafkaProducerConfiguration kafkaProducerConfiguration;
 
-    public void publishCompressionMessage(UploadToken token, String groupId) throws KafkaPublishMessageFailed {
+    public void publishCompressionMessage(UploadToken token, String key)
+            throws KafkaPublishMessageFailed {
 
         try {
-            kafkaTemplate.send(kafkaProducerConfiguration.fileCompressionTopic, groupId, token).get(10, TimeUnit.SECONDS);
+            kafkaTemplate.send(kafkaProducerConfiguration.fileCompressionTopic, key, token);
             log.info("Published message to Kafka for token: {}", token);
         }
         catch (Exception e) {

@@ -1,16 +1,13 @@
 package org.brain.uploadservice.service.impl;
 
-import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.brain.uploadservice.model.TokenStatus;
 import org.brain.uploadservice.model.UploadToken;
 import org.brain.uploadservice.payload.ObjectResponse;
 import org.brain.uploadservice.service.UploadService;
 import org.brain.uploadservice.service.UploadStatusHandler;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import software.amazon.awssdk.transfer.s3.model.Upload;
 
 import java.util.UUID;
 

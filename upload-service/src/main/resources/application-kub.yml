@@ -4,21 +4,25 @@ server:
 spring:
     servlet:
         multipart:
-            max-file-size: 2GB
-            max-request-size: 2GB
+            max-file-size: 1GB
+            max-request-size: 1GB
     application:
         name: upload-service
     neo4j:
-        uri: ${SPRING_NEO4J_URI:bolt://localhost:7687}
+        uri: ${SPRING_NEO4J_URI:bolt://neo4j.default.svc.cluster.local:7687}
         authentication:
             password: ${SPRING_NEO4J_PASSWORD:password}
             username: ${SPRING_NEO4J_USERNAME:neo4j}
     data:
         redis:
-            host: ${SPRING_REDIS_HOST:localhost}
+            host: ${SPRING_REDIS_HOST:redis-master.default.svc.cluster.local}
             port: ${SPRING_REDIS_PORT:6379}
+            password: ${SPRING_REDIS_PASSWORD:mysecretpassword}
     kafka:
-        bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+        bootstrap-servers:
+            - my-kafka-cluster-controller-0.my-kafka-cluster-controller-headless.default.svc.cluster.local:9092
+            - my-kafka-cluster-controller-1.my-kafka-cluster-controller-headless.default.svc.cluster.local:9092
+            - my-kafka-cluster-controller-2.my-kafka-cluster-controller-headless.default.svc.cluster.local:9092
         topic:
             file-compression: ${SPRING_KAFKA_TOPIC_FILE_COMPRESSION:file-compression}
         properties:
@@ -28,18 +32,3 @@ spring:
                 mechanism: ${SPRING_KAFKA_SASL_MECHANISM:PLAIN}
             security:
                 protocol: ${SPRING_KAFKA_SECURITY_PROTOCOL:SASL_PLAINTEXT}
-
-
-
-
-    cloud:
-        aws:
-            s3:
-                bucket:
-                    staging: ${SPRING_AWS_S3_BUCKET_STAGING:staging-bucket-nest}
-                region: ${SPRING_AWS_REGION:eu-central-1}
-
-    endpoints:
-        web:
-            exposure:
-                include: "*" # Expose all endpoints
