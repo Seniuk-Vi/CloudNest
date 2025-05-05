@@ -22,7 +22,7 @@ spring:
         properties:
             sasl:
                 jaas:
-                    config: ${SPRING_KAFKA_SASL_JAAS_CONFIG:org.apache.kafka.common.security.scram.ScramLoginModule required username="user1" password="P34gV3uVml";}
+                    config: ${SPRING_KAFKA_SASL_JAAS_CONFIG:org.apache.kafka.common.security.scram.ScramLoginModule required username="user1" password="password";}
                 mechanism: ${SPRING_KAFKA_SASL_MECHANISM:PLAIN}
             security:
                 protocol: ${SPRING_KAFKA_SECURITY_PROTOCOL:SASL_PLAINTEXT}

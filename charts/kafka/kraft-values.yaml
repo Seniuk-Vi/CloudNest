@@ -7,10 +7,20 @@ image:
           value: ""
           effect: "NoSchedule"
 
+
 externalAccess:
-    enabled: false
-    autoDiscovery:
-        enabled: true
+    enabled: false  # Disable external access for local development
+
+tls:
+    enabled: false  # Disable TLS for local development
+
+sasl:
+    enabledMechanisms: PLAIN
+    client:
+        users:
+            - user1
+        passwords:
+            - password
 
 kraft:
     enabled: true
@@ -18,6 +28,7 @@ kraft:
     zookeeper:
         enabled: false
     clusterId: "3123123"
+
 extraEnvVars:
     - name: KAFKA_ENABLE_KRAFT
       value: "true"

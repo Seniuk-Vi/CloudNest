@@ -4,6 +4,8 @@ helm install my-kafka-cluster -f ./charts/kafka/kraft-values.yaml oci://registry
 
 helm delete my-kafka-cluster
 
+kubectl apply -f charts/kafka/deployment-ui.yml
+kubectl delete -f charts/kafka/deployment-ui.yml
 
 
 kubectl get svc --namespace default -l "app.kubernetes.io/instance=my-kafka-cluster,app.kubernetes.io/component=kafka,pod" -o jsonpath='{.items[*].status.loadBalancer.ingress[0].ip}' | % { $_ -replace " ", "`n" }

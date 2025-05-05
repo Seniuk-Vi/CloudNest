@@ -19,7 +19,7 @@ spec:
                 -   name: upload-service
                     image: vitaliiseniuk/upload-service:latest
                     ports:
-                        - containerPort: 8081
+                        -   containerPort: 8081
                     env:
                         -   name: SPRING_PROFILES_ACTIVE
                             valueFrom:
@@ -41,6 +41,11 @@ spec:
                                 configMapKeyRef:
                                     name: upload-service-config
                                     key: SPRING_NEO4J_URI
+                        -   name: SPRING_KAFKA_SASL_JAAS_CONFIG
+                            valueFrom:
+                                configMapKeyRef:
+                                    name: upload-service-config
+                                    key: SPRING_KAFKA_SASL_JAAS_CONFIG
                         -   name: OTEL_EXPORTER_OTLP_ENDPOINT
                             value: http://collector:4318
                         -   name: AWS_ACCESS_KEY_ID

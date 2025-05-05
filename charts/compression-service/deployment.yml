@@ -44,6 +44,11 @@ spec:
                                     key: SPRING_NEO4J_URI
                         -   name: OTEL_EXPORTER_OTLP_ENDPOINT
                             value: http://collector:4318
+                        -   name: SPRING_KAFKA_SASL_JAAS_CONFIG
+                            valueFrom:
+                                configMapKeyRef:
+                                    name: upload-service-config
+                                    key: SPRING_KAFKA_SASL_JAAS_CONFIG
                         -   name: AWS_ACCESS_KEY_ID
                             valueFrom:
                                 secretKeyRef:

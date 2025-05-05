@@ -13,3 +13,4 @@ data:
     SPRING_REDIS_PORT: "6379"
     SPRING_NEO4J_URI: "bolt://neo4j.default.svc.cluster.local:7687"
     OTEL_EXPORTER_OTLP_ENDPOINT: "http://collector:4318"
+    SPRING_KAFKA_SASL_JAAS_CONFIG: 'org.apache.kafka.common.security.scram.ScramLoginModule required username="user1" password="password";'

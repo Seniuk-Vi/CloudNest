@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: kafka-ui-deployment
+    labels:
+        app: kafka-ui
+    # namespace: mstore
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+            app: kafka-ui
+    template:
+        metadata:
+            labels:
+                app: kafka-ui
+        spec:
+            containers:
+                -   name: kafka-ui
+                    image: kafbat/kafka-ui:main
+                    env:
+                        -   name: KAFKA_CLUSTERS_0_NAME
+                            value: "K8 Kafka Cluster"
+                        -   name: KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS
+                            value: >
+                                my-kafka-cluster-controller-0.my-kafka-cluster-controller-headless.default.svc.cluster.local:9092,
+                                my-kafka-cluster-controller-1.my-kafka-cluster-controller-headless.default.svc.cluster.local:9092,
+                                my-kafka-cluster-controller-2.my-kafka-cluster-controller-headless.default.svc.cluster.local:9092
+                        -   name: DYNAMIC_CONFIG_ENABLED
+                            value: "true"
+                        -   name: KAFKA_CLUSTERS_0_PROPERTIES_SASL_JAAS_CONFIG
+                            value: org.apache.kafka.common.security.scram.ScramLoginModule required username="user1" password="password";
+                        -   name: KAFKA_CLUSTERS_0_PROPERTIES_SECURITY_PROTOCOL
+                            value: "SASL_PLAINTEXT"
+                        -   name: KAFKA_CLUSTERS_0_PROPERTIES_SASL_MECHANISM
+                            value: "PLAIN"
+                    imagePullPolicy: Always
+                    ports:
+                        -   containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+    name: kafka-ui-service
+spec:
+    selector:
+        app: kafka-ui
+    type: NodePort
+    ports:
+        -   protocol: TCP
+            port: 8080
+            targetPort: 8080
+            nodePort: 30655
