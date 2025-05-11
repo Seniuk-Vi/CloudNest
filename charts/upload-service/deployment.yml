@@ -62,13 +62,13 @@ spec:
                         httpGet:
                             path: /actuator/health
                             port: 8081
-                        initialDelaySeconds: 5
+                        initialDelaySeconds: 60
                         periodSeconds: 10
                     livenessProbe:
                         httpGet:
                             path: /actuator/health
                             port: 8081
-                        initialDelaySeconds: 10
+                        initialDelaySeconds: 60
                         periodSeconds: 15
                     resources:
                         requests:

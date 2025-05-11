@@ -52,8 +52,6 @@ kubectl  apply -f charts/upload-service/deployment.yml
 
 kubectl  apply -f charts/upload-service/service.yml
 
-kubectl  apply -f charts/upload-service/ingress.yml
-
 kubectl  apply -f charts/upload-service/hpa.yml
 
 ### Compression service
@@ -79,8 +77,3 @@ kubectl describe pod <pod-name>
 kubectl describe svc <service-name>
 
 
-## ingress
-
-helm repo add nginx-stable https://helm.nginx.com/stable
-helm repo update
-helm delete my-nginx nginx-stable/nginx-ingress
