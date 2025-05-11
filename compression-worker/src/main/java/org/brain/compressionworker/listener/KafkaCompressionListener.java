@@ -45,14 +45,9 @@ public class KafkaCompressionListener {
     @RetryableTopic(
             attempts = "${spring.kafka.retry.attempts}",
             backoff = @Backoff(delay = 3000, multiplier = 1.5, maxDelay = 15000),
-            exclude = {NullPointerException.class},
-            include = {
-                    S3DownloadFailed.class,
-                    S3UploadFailed.class,
-                    CompressionFailed.class
-            }
+            exclude = {NullPointerException.class}
     )
-    @KafkaListener(topics = "${spring.kafka.topic.file-compression}")
+    @KafkaListener(topics = "${spring.kafka.topic.file-compression}", containerFactory = "kafkaListenerContainerFactory")
     @Transactional
     public void fileCompressionListener(UploadToken message, Acknowledgment acknowledgment) throws S3DownloadFailed, CompressionFailed {
 

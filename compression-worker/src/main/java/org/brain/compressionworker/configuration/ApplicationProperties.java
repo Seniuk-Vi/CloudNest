@@ -14,7 +14,6 @@ public class ApplicationProperties {
 
     @Data
     public static class Kafka {
-        private String bootstrapServers;
         private final Topic topic = new Topic();
 
         @Data

@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+    name: {{ .Values.service.name }}-config
+    labels:
+        app: {{ .Values.service.name }}
+        environment: production
+    annotations:
+        purpose: "Configuration for {{ .Values.service.name }}"
+data:
+{{- range $key, $value := .Values.config.env }}
+  {{ $key }}: "{{ $value}}"
+{{- end }}

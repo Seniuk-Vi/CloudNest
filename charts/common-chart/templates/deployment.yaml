@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: {{ .Values.service.name }}
+    labels:
+        app: {{ .Values.service.name }}
+        environment: production
+spec:
+    replicas: {{ .Values.replicaCount }}
+    selector:
+        matchLabels:
+            app: {{ .Values.service.name }}
+    template:
+        metadata:
+            labels:
+                app: {{ .Values.service.name }}
+        spec:
+            containers:
+                - name: {{ .Values.service.name }}
+                  image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+                  imagePullPolicy: {{ .Values.image.pullPolicy }}
+                  ports:
+                      - containerPort: {{ .Values.service.port }}
+                  env:
+                  {{- range $key, $value := .Values.config.env }}
+                    - name: {{ $key }}
+                      valueFrom:
+                          configMapKeyRef:
+                              name: {{ $.Values.service.name }}-config
+                              key: {{ $key }}
+                  {{- end }}
+                    - name: AWS_ACCESS_KEY_ID
+                      valueFrom:
+                            secretKeyRef:
+                                name: {{ .Values.service.name }}-secrets
+                                key: access-key
+                    - name: AWS_SECRET_ACCESS_KEY
+                      valueFrom:
+                          secretKeyRef:
+                              name: {{ .Values.service.name }}-secrets
+                              key: secret-key
+                  readinessProbe:
+                      httpGet:
+                          path: /actuator/health
+                          port: {{ .Values.service.port }}
+                      initialDelaySeconds: 60
+                      periodSeconds: 10
+                  livenessProbe:
+                      httpGet:
+                          path: /actuator/health
+                          port: {{ .Values.service.port }}
+                      initialDelaySeconds: 60
+                      periodSeconds: 15
+                  resources:
+                      requests:
+                          memory: "{{ .Values.resources.requests.memory }}"
+                          cpu: "{{ .Values.resources.requests.cpu }}"
+                      limits:
+                          memory: "{{ .Values.resources.limits.memory }}"
+                          cpu: "{{ .Values.resources.limits.cpu }}"

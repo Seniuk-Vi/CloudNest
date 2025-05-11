@@ -54,6 +54,15 @@ kubectl  apply -f charts/upload-service/service.yml
 
 kubectl  apply -f charts/upload-service/hpa.yml
 
+kubectl  delete -f charts/upload-service/secrets.yml
+
+kubectl  delete -f charts/upload-service/configmap.yml
+
+kubectl  delete -f charts/upload-service/deployment.yml
+
+kubectl  delete -f charts/upload-service/service.yml
+
+kubectl  delete -f charts/upload-service/hpa.yml
 ### Compression service
 docker build -t compression-worker:latest .
 docker tag compression-worker:latest vitaliiseniuk/compression-worker:latest
@@ -66,6 +75,10 @@ kubectl apply -f charts/monitoring/grafana/deployment.yml
 kubectl apply -f charts/monitoring/zipkin/deployment.yml
 kubectl apply -f charts/monitoring/otel-collector/deployment.yml
 
+kubectl delete -f charts/monitoring/prometheus/deployment.yml
+kubectl delete -f charts/monitoring/grafana/deployment.yml
+kubectl delete -f charts/monitoring/zipkin/deployment.yml
+kubectl delete -f charts/monitoring/otel-collector/deployment.yml
 ## kubernetes commands
 kubectl get pods
 kubectl get services

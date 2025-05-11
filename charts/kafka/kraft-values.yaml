@@ -1,15 +1,8 @@
 image:
     debug: true
 
-    tolerations:
-        - key: "node-role.kubernetes.io/control-plane"
-          operator: "Equal"
-          value: ""
-          effect: "NoSchedule"
-
-
 externalAccess:
-    enabled: false  # Disable external access for local development
+    enabled: false
 
 tls:
     enabled: false  # Disable TLS for local development
@@ -27,7 +20,6 @@ kraft:
     replicas: 3
     zookeeper:
         enabled: false
-    clusterId: "3123123"
 
 extraEnvVars:
     - name: KAFKA_ENABLE_KRAFT
@@ -38,3 +30,7 @@ extraEnvVars:
       value: "true" # enable auto topic creation
 
 clusterId: "3123123"
+
+
+
+

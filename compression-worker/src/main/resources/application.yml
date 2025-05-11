@@ -23,6 +23,10 @@ spring:
             enable-auto-commit: false
             properties:
                 max.poll.interval.ms: 600000 # 10 хвилин для тривалої обробки
+            bootstrap-servers:
+                - my-kafka-cluster-controller-0.my-kafka-cluster-controller-headless.default.svc.cluster.local:9092
+                - my-kafka-cluster-controller-1.my-kafka-cluster-controller-headless.default.svc.cluster.local:9092
+                - my-kafka-cluster-controller-2.my-kafka-cluster-controller-headless.default.svc.cluster.local:9092
         listener:
             ack-mode: MANUAL
         retry:
@@ -30,6 +34,13 @@ spring:
                 attempts: 3 # Кількість спроб повторної обробки
                 backoff:
                     delay: 1000 # Затримка між спробами - 1 секунда
+        properties:
+            sasl:
+                jaas:
+                    config: ${SPRING_KAFKA_SASL_JAAS_CONFIG:org.apache.kafka.common.security.scram.ScramLoginModule required username="user1" password="P34gV3uVml";}
+                mechanism: ${SPRING_KAFKA_SASL_MECHANISM:PLAIN}
+            security:
+                protocol: ${SPRING_KAFKA_SECURITY_PROTOCOL:SASL_PLAINTEXT}
     cloud:
         aws:
             s3:

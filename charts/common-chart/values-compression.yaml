@@ -1,0 +1,43 @@
+replicaCount: 2
+image:
+    repository: vitaliiseniuk/compression-worker
+    tag: latest
+    pullPolicy: IfNotPresent
+
+service:
+    name: compression-service
+    port: 8080
+    targetPort: 8080
+    nodePort: 30082
+
+resources:
+    requests:
+        memory: "512Mi"
+        cpu: "1000m"
+    limits:
+        memory: "1024Mi"
+        cpu: "2000m"
+
+hpa:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 4
+    cpuUtilization: 70
+
+config:
+    env:
+        SPRING_PROFILES_ACTIVE: "kub"
+        SPRING_REDIS_HOST: "redis-master.default.svc.cluster.local"
+        SPRING_REDIS_PORT: "6379"
+        SPRING_NEO4J_URI: "bolt://neo4j.default.svc.cluster.local:7687"
+        OTEL_EXPORTER_OTLP_ENDPOINT: "http://collector:4318"
+        SPRING_KAFKA_RETRY_ATTEMPTS: "3"
+awsSecrets:
+    accessKey: "QUtJQVU2VlRUTVdBRVFWQlJGWFQ="
+    secretKey: "ajdobkEvQjZNdHU1ZXRBMkNoZ3ZFQ053eDZWaWE1R2ljT1ptVGRLdw=="
+
+
+
+
+
+

@@ -19,6 +19,11 @@ spring:
             - my-kafka-cluster-controller-2.my-kafka-cluster-controller-headless.default.svc.cluster.local:9092
         topic:
             file-compression: ${SPRING_KAFKA_TOPIC_FILE_COMPRESSION:file-compression}
+        consumer:
+            bootstrap-servers:
+                - my-kafka-cluster-controller-0.my-kafka-cluster-controller-headless.default.svc.cluster.local:9092
+                - my-kafka-cluster-controller-1.my-kafka-cluster-controller-headless.default.svc.cluster.local:9092
+                - my-kafka-cluster-controller-2.my-kafka-cluster-controller-headless.default.svc.cluster.local:9092
         properties:
             sasl:
                 jaas:
@@ -26,3 +31,13 @@ spring:
                 mechanism: ${SPRING_KAFKA_SASL_MECHANISM:PLAIN}
             security:
                 protocol: ${SPRING_KAFKA_SECURITY_PROTOCOL:SASL_PLAINTEXT}
+        producer:
+            bootstrap-servers:
+                - my-kafka-cluster-controller-0.my-kafka-cluster-controller-headless.default.svc.cluster.local:9092
+                - my-kafka-cluster-controller-1.my-kafka-cluster-controller-headless.default.svc.cluster.local:9092
+                - my-kafka-cluster-controller-2.my-kafka-cluster-controller-headless.default.svc.cluster.local:9092
+        streams:
+            bootstrap-servers:
+                - my-kafka-cluster-controller-0.my-kafka-cluster-controller-headless.default.svc.cluster.local:9092
+                - my-kafka-cluster-controller-1.my-kafka-cluster-controller-headless.default.svc.cluster.local:9092
+                - my-kafka-cluster-controller-2.my-kafka-cluster-controller-headless.default.svc.cluster.local:9092

@@ -1,0 +1,38 @@
+replicaCount: 2
+
+image:
+    repository: vitaliiseniuk/upload-service
+    tag: latest
+    pullPolicy: IfNotPresent
+
+service:
+    name: upload-service
+    type: NodePort
+    port: 8081
+    targetPort: 8081
+    nodePort: 30081
+
+resources:
+    requests:
+        memory: "513Mi"
+        cpu: "1000m"
+    limits:
+        memory: "1024Mi"
+        cpu: "2000m"
+
+hpa:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 4
+    cpuUtilization: 70
+
+config:
+    env:
+        SPRING_PROFILES_ACTIVE: "kub"
+        SPRING_REDIS_HOST: "redis-master.default.svc.cluster.local"
+        SPRING_REDIS_PORT: "6379"
+        SPRING_NEO4J_URI: "bolt://neo4j.default.svc.cluster.local:7687"
+        OTEL_EXPORTER_OTLP_ENDPOINT: "http://collector:4318"
+awsSecrets:
+    accessKey: "QUtJQVU2VlRUTVdBRVFWQlJGWFQ="
+    secretKey: "ajdobkEvQjZNdHU1ZXRBMkNoZ3ZFQ053eDZWaWE1R2ljT1ptVGRLdw=="

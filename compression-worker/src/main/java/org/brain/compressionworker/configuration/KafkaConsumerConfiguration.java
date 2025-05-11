@@ -5,11 +5,16 @@ import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.brain.compressionworker.model.UploadToken;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.core.ProducerFactory;
 import org.springframework.kafka.listener.ContainerProperties;
 import org.springframework.kafka.listener.DefaultErrorHandler;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
@@ -25,12 +30,8 @@ public class KafkaConsumerConfiguration {
     private final ApplicationProperties applicationProperties;
 
     @Bean
-    public ConsumerFactory<String, UploadToken> consumerFactory() {
-        System.out.println("Bootstrap servers: " + applicationProperties.getKafka().getBootstrapServers());
-        Map<String, Object> configProps = new HashMap<>();
-        configProps.put(
-                ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG,
-                applicationProperties.getKafka().getBootstrapServers());
+    public ConsumerFactory<String, UploadToken> consumerFactory(KafkaProperties kafkaProperties) {
+        Map<String, Object> configProps = kafkaProperties.buildConsumerProperties(null);
         configProps.put(
                 ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG,
                 StringDeserializer.class);
@@ -54,11 +55,11 @@ public class KafkaConsumerConfiguration {
 
     @Bean
     public ConcurrentKafkaListenerContainerFactory<String, UploadToken>
-    kafkaListenerContainerFactory() {
+    kafkaListenerContainerFactory(KafkaProperties kafkaProperties) {
         ConcurrentKafkaListenerContainerFactory<String, UploadToken> factory =
                 new ConcurrentKafkaListenerContainerFactory<>();
 
-        factory.setConsumerFactory(consumerFactory());
+        factory.setConsumerFactory(consumerFactory(kafkaProperties));
         factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL);
         factory.setConcurrency(8);
         return factory;
